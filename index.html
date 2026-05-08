@@ -11,12 +11,12 @@
       color:white;
       font-family:Arial;
       text-align:center;
-      padding-top:100px;
+      padding-top:50px;
     }
 
     .card{
       background:#1e293b;
-      width:300px;
+      width:320px;
       margin:auto;
       padding:30px;
       border-radius:20px;
@@ -44,8 +44,27 @@
       background:#2563eb;
     }
 
+    .stats{
+      display:flex;
+      justify-content:center;
+      gap:15px;
+      margin-top:30px;
+      flex-wrap:wrap;
+    }
+
+    .stat-card{
+      background:#1e293b;
+      padding:20px;
+      border-radius:15px;
+      width:120px;
+      box-shadow:0px 0px 10px #3b82f6;
+    }
+
     canvas{
       margin-top:40px;
+      background:white;
+      border-radius:10px;
+      padding:10px;
     }
 
   </style>
@@ -72,7 +91,26 @@
 
   </div>
 
-  <canvas id="myChart" width="200" height="200"></canvas>
+  <div class="stats">
+
+    <div class="stat-card">
+      <h2>120</h2>
+      <p>Users</p>
+    </div>
+
+    <div class="stat-card">
+      <h2>45</h2>
+      <p>Tasks</p>
+    </div>
+
+    <div class="stat-card">
+      <h2>80%</h2>
+      <p>Growth</p>
+    </div>
+
+  </div>
+
+  <canvas id="myChart" width="300" height="200"></canvas>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
