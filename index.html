@@ -66,15 +66,26 @@
 
   </div>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<canvas id="myChart" width="200" height="200"></canvas>
+
 <script>
 
-function showMessage(){
+const ctx = document.getElementById('myChart');
 
-  let name = document.getElementById("username").value;
+new Chart(ctx, {
+  type: 'bar',
+  data: {
+    labels: ['Mon', 'Tue', 'Wed', 'Thu'],
+    datasets: [{
+      label: 'Users',
+      data: [12, 19, 8, 15]
+    }]
+  }
+});
 
-  alert("Welcome " + name + " 🚀");
-
-}
+</script>
 
 </script>
 
