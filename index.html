@@ -68,6 +68,8 @@
       Login
     </button>
 
+    <h3 id="message"></h3>
+
   </div>
 
   <canvas id="myChart" width="200" height="200"></canvas>
@@ -80,7 +82,8 @@ function showMessage(){
 
   let name = document.getElementById("username").value;
 
-  alert("Welcome " + name + " 🚀");
+  document.getElementById("message").innerHTML =
+  "Welcome " + name + " 🚀";
 
 }
 
