@@ -2,7 +2,7 @@
 <html>
 
 <head>
-  <title>Hackathon Dashboard</title>
+  <title>SafeHer - Women Safety Dashboard</title>
 
   <style>
 
@@ -20,51 +20,34 @@
       margin:auto;
       padding:30px;
       border-radius:20px;
-      box-shadow:0px 0px 20px #3b82f6;
-    }
-
-    input{
-      padding:12px;
-      width:80%;
-      border:none;
-      border-radius:10px;
-      outline:none;
+      box-shadow:0px 0px 20px red;
     }
 
     button{
-      background:#3b82f6;
+      background:red;
       color:white;
       border:none;
-      padding:12px 20px;
+      padding:15px 25px;
       border-radius:10px;
       cursor:pointer;
+      font-size:16px;
+      margin-top:15px;
     }
 
     button:hover{
-      background:#2563eb;
+      background:#cc0000;
     }
 
-    .stats{
-      display:flex;
-      justify-content:center;
-      gap:15px;
+    .safe{
+      margin-top:20px;
+      font-size:18px;
+    }
+
+    .contacts{
       margin-top:30px;
-      flex-wrap:wrap;
-    }
-
-    .stat-card{
-      background:#1e293b;
-      padding:20px;
-      border-radius:15px;
-      width:120px;
-      box-shadow:0px 0px 10px #3b82f6;
-    }
-
-    canvas{
-      margin-top:40px;
-      background:white;
+      background:#111827;
+      padding:15px;
       border-radius:10px;
-      padding:10px;
     }
 
   </style>
@@ -75,68 +58,29 @@
 
   <div class="card">
 
-    <h1>AtomQuest Hackathon</h1>
+    <h1>SafeHer 🚨</h1>
+    <p>Women Safety Dashboard</p>
 
-    <p>My first deployed project 🚀</p>
+    <button onclick="sendSOS()">SOS ALERT</button>
 
-    <input type="text" id="username" placeholder="Enter your name">
+    <div class="safe" id="status"></div>
 
-    <br><br>
-
-    <button onclick="showMessage()">
-      Login
-    </button>
-
-    <h3 id="message"></h3>
-
-  </div>
-
-  <div class="stats">
-
-    <div class="stat-card">
-      <h2>120</h2>
-      <p>Users</p>
-    </div>
-
-    <div class="stat-card">
-      <h2>45</h2>
-      <p>Tasks</p>
-    </div>
-
-    <div class="stat-card">
-      <h2>80%</h2>
-      <p>Growth</p>
+    <div class="contacts">
+      <p>📞 Mom: 9876543210</p>
+      <p>📞 Friend: 9123456780</p>
+      <p>📞 Police: 112</p>
     </div>
 
   </div>
-
-  <canvas id="myChart" width="300" height="200"></canvas>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
 
-function showMessage(){
+function sendSOS(){
 
-  let name = document.getElementById("username").value;
-
-  document.getElementById("message").innerHTML =
-  "Welcome " + name + " 🚀";
+  document.getElementById("status").innerHTML =
+  "🚨 Emergency Alert Sent! Help is on the way 💖";
 
 }
-
-const ctx = document.getElementById('myChart');
-
-new Chart(ctx, {
-  type: 'bar',
-  data: {
-    labels: ['Mon', 'Tue', 'Wed', 'Thu'],
-    datasets: [{
-      label: 'Users',
-      data: [12, 19, 8, 15]
-    }]
-  }
-});
 
 </script>
 
