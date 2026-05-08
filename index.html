@@ -11,26 +11,35 @@
       color:white;
       font-family:Arial;
       text-align:center;
-      padding-top:50px;
+      padding-top:30px;
     }
 
     .card{
       background:#1e293b;
-      width:320px;
+      width:340px;
       margin:auto;
       padding:30px;
       border-radius:20px;
-      box-shadow:0px 0px 20px red;
+      box-shadow:0px 0px 25px red;
+    }
+
+    input{
+      padding:12px;
+      width:80%;
+      border:none;
+      border-radius:10px;
+      outline:none;
+      margin-top:10px;
     }
 
     button{
       background:red;
       color:white;
       border:none;
-      padding:15px 25px;
+      padding:14px 22px;
       border-radius:10px;
       cursor:pointer;
-      font-size:16px;
+      font-size:15px;
       margin-top:15px;
     }
 
@@ -38,16 +47,21 @@
       background:#cc0000;
     }
 
-    .safe{
-      margin-top:20px;
+    .msg{
+      margin-top:15px;
       font-size:18px;
+      color:#22c55e;
     }
 
-    .contacts{
-      margin-top:30px;
+    .safeBox{
+      margin-top:25px;
       background:#111827;
       padding:15px;
       border-radius:10px;
+    }
+
+    .safeBox p{
+      margin:5px;
     }
 
   </style>
@@ -61,11 +75,17 @@
     <h1>SafeHer 🚨</h1>
     <p>Women Safety Dashboard</p>
 
-    <button onclick="sendSOS()">SOS ALERT</button>
+    <input type="text" id="name" placeholder="Enter your name">
 
-    <div class="safe" id="status"></div>
+    <br>
 
-    <div class="contacts">
+    <button onclick="login()">Login</button>
+
+    <button onclick="sos()">SOS ALERT</button>
+
+    <div class="msg" id="msg"></div>
+
+    <div class="safeBox">
       <p>📞 Mom: 9876543210</p>
       <p>📞 Friend: 9123456780</p>
       <p>📞 Police: 112</p>
@@ -75,9 +95,18 @@
 
 <script>
 
-function sendSOS(){
+function login(){
 
-  document.getElementById("status").innerHTML =
+  let name = document.getElementById("name").value;
+
+  document.getElementById("msg").innerHTML =
+  "Welcome " + name + " 💖 Stay Safe!";
+
+}
+
+function sos(){
+
+  document.getElementById("msg").innerHTML =
   "🚨 Emergency Alert Sent! Help is on the way 💖";
 
 }
