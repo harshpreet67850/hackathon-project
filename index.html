@@ -16,7 +16,7 @@
 
     .card{
       background:#1e293b;
-      width:340px;
+      width:350px;
       margin:auto;
       padding:30px;
       border-radius:20px;
@@ -40,7 +40,7 @@
       border-radius:10px;
       cursor:pointer;
       font-size:15px;
-      margin-top:15px;
+      margin-top:12px;
     }
 
     button:hover{
@@ -50,18 +50,21 @@
     .msg{
       margin-top:15px;
       font-size:18px;
+    }
+
+    .safe{
       color:#22c55e;
     }
 
-    .safeBox{
-      margin-top:25px;
+    .danger{
+      color:#ef4444;
+    }
+
+    .box{
+      margin-top:20px;
       background:#111827;
       padding:15px;
       border-radius:10px;
-    }
-
-    .safeBox p{
-      margin:5px;
     }
 
   </style>
@@ -80,12 +83,12 @@
     <br>
 
     <button onclick="login()">Login</button>
-
     <button onclick="sos()">SOS ALERT</button>
+    <button onclick="locationTrack()">📍 My Location</button>
 
-    <div class="msg" id="msg"></div>
+    <div id="msg" class="msg"></div>
 
-    <div class="safeBox">
+    <div class="box">
       <p>📞 Mom: 9876543210</p>
       <p>📞 Friend: 9123456780</p>
       <p>📞 Police: 112</p>
@@ -100,14 +103,35 @@ function login(){
   let name = document.getElementById("name").value;
 
   document.getElementById("msg").innerHTML =
-  "Welcome " + name + " 💖 Stay Safe!";
+  "Welcome " + name + " 💖 Stay Safe";
 
 }
 
 function sos(){
 
   document.getElementById("msg").innerHTML =
-  "🚨 Emergency Alert Sent! Help is on the way 💖";
+  "🚨 EMERGENCY ALERT SENT! HELP IS ON THE WAY!";
+
+  // siren sound
+  let audio = new Audio("https://www.soundjay.com/buttons/sounds/beep-07.mp3");
+  audio.play();
+
+}
+
+function locationTrack(){
+
+  if(navigator.geolocation){
+
+    navigator.geolocation.getCurrentPosition(function(position){
+
+      document.getElementById("msg").innerHTML =
+      "📍 Location: " + position.coords.latitude + ", " + position.coords.longitude;
+
+    });
+
+  } else {
+    alert("Location not supported");
+  }
 
 }
 
