@@ -12,6 +12,7 @@
       font-family:Arial;
       text-align:center;
       padding:20px;
+      transition:0.5s;
     }
 
     .card{
@@ -45,23 +46,37 @@
       cursor:pointer;
       font-size:15px;
       color:white;
+      transition:0.3s;
     }
 
     .login{
       background:#3b82f6;
     }
 
+    .login:hover{
+      background:#2563eb;
+    }
+
     .sos{
       background:#ef4444;
+    }
+
+    .sos:hover{
+      background:#b91c1c;
     }
 
     .location{
       background:#22c55e;
     }
 
+    .location:hover{
+      background:#16a34a;
+    }
+
     .msg{
       margin-top:15px;
       font-size:16px;
+      font-weight:bold;
     }
 
     .panel{
@@ -72,12 +87,11 @@
       text-align:left;
     }
 
-    .safe{
-      color:#22c55e;
-    }
-
-    .danger{
-      color:#ef4444;
+    /* Flash effect */
+    @keyframes flash {
+      0% { background:#0b1220; }
+      50% { background:#7f1d1d; }
+      100% { background:#0b1220; }
     }
 
   </style>
@@ -89,7 +103,7 @@
   <div class="card">
 
     <h1>SafeHer Pro 🚨</h1>
-    <p>AI Powered Women Safety System</p>
+    <p>Women Safety System</p>
 
     <input type="text" id="name" placeholder="Enter your name">
 
@@ -117,20 +131,38 @@ function login(){
   document.getElementById("msg").innerHTML =
   "👋 Welcome " + name + " | Status: SAFE 💚";
 
+  document.body.style.background = "#0b1220";
 }
 
 function sos(){
 
-  document.getElementById("msg").innerHTML =
-  "🚨 ALERT SENT! Emergency services notified!";
+  let msg = document.getElementById("msg");
 
-  // sound alert
-  let audio = new Audio("https://www.soundjay.com/buttons/sounds/beep-07.mp3");
-  audio.play();
+  let countdown = 5;
 
-  // visual danger highlight
-  document.body.style.background = "#2a0a0a";
+  msg.innerHTML = "🚨 SOS ACTIVATED... Sending in " + countdown;
 
+  let timer = setInterval(() => {
+
+    countdown--;
+
+    msg.innerHTML = "🚨 Sending alert in " + countdown;
+
+    if(countdown < 0){
+
+      clearInterval(timer);
+
+      msg.innerHTML = "🚨 ALERT SENT! HELP IS ON THE WAY!";
+
+      // sound alert
+      let audio = new Audio("https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg");
+      audio.play().catch(err => console.log("Audio blocked"));
+
+      // screen flash
+      document.body.style.animation = "flash 0.5s 3";
+    }
+
+  }, 1000);
 }
 
 function getLocation(){
@@ -140,7 +172,7 @@ function getLocation(){
     navigator.geolocation.getCurrentPosition(function(pos){
 
       document.getElementById("msg").innerHTML =
-      "📍 Live Location: " + pos.coords.latitude + ", " + pos.coords.longitude;
+      "📍 Location: " + pos.coords.latitude + ", " + pos.coords.longitude;
 
     });
 
