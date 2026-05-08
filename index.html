@@ -46,15 +46,21 @@
     <h1>AtomQuest Hackathon</h1>
 
     <p>My first deployed project 🚀</p>
+    <input type="text" id="username" placeholder="Enter your name">
+<br><br>
 
     <button onclick="showMessage()">
-  Get Started
+  Login
 </button>
   </div>
 <script>
 
 function showMessage(){
-  alert("Welcome Harshpreet 🚀");
+
+  let name = document.getElementById("username").value;
+
+  alert("Welcome " + name + " 🚀");
+
 }
 
 </script>
