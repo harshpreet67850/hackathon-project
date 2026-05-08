@@ -2,25 +2,29 @@
 <html>
 
 <head>
-  <title>SafeHer - Women Safety Dashboard</title>
+  <title>SafeHer Pro - Women Safety System</title>
 
   <style>
 
     body{
-      background:#0f172a;
+      background:#0b1220;
       color:white;
       font-family:Arial;
       text-align:center;
-      padding-top:30px;
+      padding:20px;
     }
 
     .card{
-      background:#1e293b;
-      width:350px;
+      background:#111827;
+      width:380px;
       margin:auto;
-      padding:30px;
-      border-radius:20px;
-      box-shadow:0px 0px 25px red;
+      padding:25px;
+      border-radius:18px;
+      box-shadow:0px 0px 30px #ef4444;
+    }
+
+    h1{
+      color:#ef4444;
     }
 
     input{
@@ -33,23 +37,39 @@
     }
 
     button{
-      background:red;
-      color:white;
+      width:85%;
+      margin-top:10px;
+      padding:12px;
       border:none;
-      padding:14px 22px;
       border-radius:10px;
       cursor:pointer;
       font-size:15px;
-      margin-top:12px;
+      color:white;
     }
 
-    button:hover{
-      background:#cc0000;
+    .login{
+      background:#3b82f6;
+    }
+
+    .sos{
+      background:#ef4444;
+    }
+
+    .location{
+      background:#22c55e;
     }
 
     .msg{
       margin-top:15px;
-      font-size:18px;
+      font-size:16px;
+    }
+
+    .panel{
+      margin-top:20px;
+      background:#0f172a;
+      padding:15px;
+      border-radius:12px;
+      text-align:left;
     }
 
     .safe{
@@ -60,13 +80,6 @@
       color:#ef4444;
     }
 
-    .box{
-      margin-top:20px;
-      background:#111827;
-      padding:15px;
-      border-radius:10px;
-    }
-
   </style>
 
 </head>
@@ -75,23 +88,22 @@
 
   <div class="card">
 
-    <h1>SafeHer 🚨</h1>
-    <p>Women Safety Dashboard</p>
+    <h1>SafeHer Pro 🚨</h1>
+    <p>AI Powered Women Safety System</p>
 
     <input type="text" id="name" placeholder="Enter your name">
 
-    <br>
+    <button class="login" onclick="login()">Login</button>
+    <button class="sos" onclick="sos()">Emergency SOS</button>
+    <button class="location" onclick="getLocation()">Live Location</button>
 
-    <button onclick="login()">Login</button>
-    <button onclick="sos()">SOS ALERT</button>
-    <button onclick="locationTrack()">📍 My Location</button>
+    <div class="msg" id="msg"></div>
 
-    <div id="msg" class="msg"></div>
-
-    <div class="box">
-      <p>📞 Mom: 9876543210</p>
-      <p>📞 Friend: 9123456780</p>
-      <p>📞 Police: 112</p>
+    <div class="panel">
+      <p>📞 Emergency Contacts</p>
+      <p>Mom: 9876543210</p>
+      <p>Friend: 9123456780</p>
+      <p>Police: 112</p>
     </div>
 
   </div>
@@ -103,29 +115,32 @@ function login(){
   let name = document.getElementById("name").value;
 
   document.getElementById("msg").innerHTML =
-  "Welcome " + name + " 💖 Stay Safe";
+  "👋 Welcome " + name + " | Status: SAFE 💚";
 
 }
 
 function sos(){
 
   document.getElementById("msg").innerHTML =
-  "🚨 EMERGENCY ALERT SENT! HELP IS ON THE WAY!";
+  "🚨 ALERT SENT! Emergency services notified!";
 
-  // siren sound
+  // sound alert
   let audio = new Audio("https://www.soundjay.com/buttons/sounds/beep-07.mp3");
   audio.play();
 
+  // visual danger highlight
+  document.body.style.background = "#2a0a0a";
+
 }
 
-function locationTrack(){
+function getLocation(){
 
   if(navigator.geolocation){
 
-    navigator.geolocation.getCurrentPosition(function(position){
+    navigator.geolocation.getCurrentPosition(function(pos){
 
       document.getElementById("msg").innerHTML =
-      "📍 Location: " + position.coords.latitude + ", " + position.coords.longitude;
+      "📍 Live Location: " + pos.coords.latitude + ", " + pos.coords.longitude;
 
     });
 
