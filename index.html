@@ -2,7 +2,7 @@
 <html>
 
 <head>
-  <title>SafeHer Pro - Women Safety System</title>
+  <title>SafeHer Final Boss</title>
 
   <style>
 
@@ -17,11 +17,11 @@
 
     .card{
       background:#111827;
-      width:380px;
+      width:400px;
       margin:auto;
       padding:25px;
       border-radius:18px;
-      box-shadow:0px 0px 30px #ef4444;
+      box-shadow:0px 0px 35px #ef4444;
     }
 
     h1{
@@ -49,29 +49,14 @@
       transition:0.3s;
     }
 
-    .login{
-      background:#3b82f6;
-    }
+    .login{ background:#3b82f6; }
+    .login:hover{ background:#2563eb; }
 
-    .login:hover{
-      background:#2563eb;
-    }
+    .sos{ background:#ef4444; }
+    .sos:hover{ background:#b91c1c; }
 
-    .sos{
-      background:#ef4444;
-    }
-
-    .sos:hover{
-      background:#b91c1c;
-    }
-
-    .location{
-      background:#22c55e;
-    }
-
-    .location:hover{
-      background:#16a34a;
-    }
+    .location{ background:#22c55e; }
+    .location:hover{ background:#16a34a; }
 
     .msg{
       margin-top:15px;
@@ -87,7 +72,14 @@
       text-align:left;
     }
 
-    /* Flash effect */
+    .risk{
+      margin-top:10px;
+      font-size:18px;
+    }
+
+    .safe{ color:#22c55e; }
+    .danger{ color:#ef4444; }
+
     @keyframes flash {
       0% { background:#0b1220; }
       50% { background:#7f1d1d; }
@@ -102,16 +94,17 @@
 
   <div class="card">
 
-    <h1>SafeHer Pro 🚨</h1>
-    <p>Women Safety System</p>
+    <h1>SafeHer Final Boss 🚨</h1>
+    <p>AI Powered Women Safety System</p>
 
     <input type="text" id="name" placeholder="Enter your name">
 
     <button class="login" onclick="login()">Login</button>
-    <button class="sos" onclick="sos()">Emergency SOS</button>
+    <button class="sos" onclick="sos()">Panic SOS</button>
     <button class="location" onclick="getLocation()">Live Location</button>
 
     <div class="msg" id="msg"></div>
+    <div class="risk" id="risk"></div>
 
     <div class="panel">
       <p>📞 Emergency Contacts</p>
@@ -129,37 +122,41 @@ function login(){
   let name = document.getElementById("name").value;
 
   document.getElementById("msg").innerHTML =
-  "👋 Welcome " + name + " | Status: SAFE 💚";
+  "👋 Welcome " + name;
 
-  document.body.style.background = "#0b1220";
+  document.getElementById("risk").innerHTML =
+  "Status: SAFE 💚";
+
 }
 
 function sos(){
 
   let msg = document.getElementById("msg");
+  let risk = document.getElementById("risk");
 
-  let countdown = 5;
+  let count = 5;
 
-  msg.innerHTML = "🚨 SOS ACTIVATED... Sending in " + countdown;
+  msg.innerHTML = "🚨 PANIC MODE ACTIVATED... " + count;
 
   let timer = setInterval(() => {
 
-    countdown--;
+    count--;
 
-    msg.innerHTML = "🚨 Sending alert in " + countdown;
+    msg.innerHTML = "🚨 Sending alert in " + count;
 
-    if(countdown < 0){
+    if(count < 0){
 
       clearInterval(timer);
 
       msg.innerHTML = "🚨 ALERT SENT! HELP IS ON THE WAY!";
+      risk.innerHTML = "Status: DANGER 🔴";
 
-      // sound alert
+      // sound
       let audio = new Audio("https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg");
-      audio.play().catch(err => console.log("Audio blocked"));
+      audio.play().catch(()=>{});
 
-      // screen flash
-      document.body.style.animation = "flash 0.5s 3";
+      // flash
+      document.body.style.animation = "flash 0.4s 5";
     }
 
   }, 1000);
@@ -172,7 +169,10 @@ function getLocation(){
     navigator.geolocation.getCurrentPosition(function(pos){
 
       document.getElementById("msg").innerHTML =
-      "📍 Location: " + pos.coords.latitude + ", " + pos.coords.longitude;
+      "📍 Location Shared Successfully";
+
+      document.getElementById("risk").innerHTML =
+      "Lat: " + pos.coords.latitude + " | Long: " + pos.coords.longitude;
 
     });
 
