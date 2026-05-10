@@ -1,39 +1,35 @@
 <!DOCTYPE html>
 <html>
-
 <head>
-  <title>SafeHer Final Boss</title>
+  <title>SafeHer Shield AI</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
 
   <style>
-
     body{
       background:#0b1220;
       color:white;
       font-family:Arial;
       text-align:center;
       padding:20px;
-      transition:0.5s;
     }
 
     .card{
       background:#111827;
-      width:400px;
+      width:420px;
       margin:auto;
       padding:25px;
       border-radius:18px;
-      box-shadow:0px 0px 35px #ef4444;
+      box-shadow:0 0 35px #ef4444;
     }
 
-    h1{
-      color:#ef4444;
-    }
+    h1{ color:#ef4444; }
 
     input{
       padding:12px;
       width:80%;
       border:none;
       border-radius:10px;
-      outline:none;
       margin-top:10px;
     }
 
@@ -44,146 +40,172 @@
       border:none;
       border-radius:10px;
       cursor:pointer;
-      font-size:15px;
       color:white;
-      transition:0.3s;
+      font-size:14px;
     }
 
     .login{ background:#3b82f6; }
-    .login:hover{ background:#2563eb; }
-
     .sos{ background:#ef4444; }
-    .sos:hover{ background:#b91c1c; }
+    .loc{ background:#22c55e; }
+    .voice{ background:#a855f7; }
 
-    .location{ background:#22c55e; }
-    .location:hover{ background:#16a34a; }
-
-    .msg{
+    .status{
       margin-top:15px;
-      font-size:16px;
       font-weight:bold;
+      font-size:14px;
     }
 
     .panel{
-      margin-top:20px;
+      margin-top:15px;
       background:#0f172a;
-      padding:15px;
-      border-radius:12px;
+      padding:12px;
+      border-radius:10px;
       text-align:left;
-    }
-
-    .risk{
-      margin-top:10px;
-      font-size:18px;
-    }
-
-    .safe{ color:#22c55e; }
-    .danger{ color:#ef4444; }
-
-    @keyframes flash {
-      0% { background:#0b1220; }
-      50% { background:#7f1d1d; }
-      100% { background:#0b1220; }
+      font-size:13px;
     }
 
   </style>
-
 </head>
 
 <body>
 
-  <div class="card">
+<div class="card">
 
-    <h1>SafeHer Final Boss 🚨</h1>
-    <p>AI Powered Women Safety System</p>
+  <h1>🚨 SafeHer Shield AI</h1>
 
-    <input type="text" id="name" placeholder="Enter your name">
+  <input id="name" placeholder="Enter your name">
 
-    <button class="login" onclick="login()">Login</button>
-    <button class="sos" onclick="sos()">Panic SOS</button>
-    <button class="location" onclick="getLocation()">Live Location</button>
+  <button class="login" onclick="login()">Login</button>
+  <button class="sos" onclick="sos()">PANIC SOS</button>
+  <button class="loc" onclick="startTracking()">LIVE LOCATION</button>
+  <button class="voice" onclick="voiceSOS()">VOICE SOS</button>
 
-    <div class="msg" id="msg"></div>
-    <div class="risk" id="risk"></div>
+  <div id="status" class="status"></div>
 
-    <div class="panel">
-      <p>📞 Emergency Contacts</p>
-      <p>Mom: 9876543210</p>
-      <p>Friend: 9123456780</p>
-      <p>Police: 112</p>
-    </div>
-
+  <div class="panel">
+    <p>📞 Emergency Contacts</p>
+    <p>Mom: 9876543210</p>
+    <p>Friend: 9123456780</p>
+    <p>Police: 112</p>
   </div>
 
-<script>
+</div>
 
+<script>
+emailjs.init("YOUR_PUBLIC_KEY");
+
+let lat = 0, long = 0;
+let tracking = false;
+
+/* ---------------- LOGIN ---------------- */
 function login(){
+  let name = document.getElementById("name").value;
+
+  document.getElementById("status").innerHTML =
+  "👋 Welcome " + name + " | Status: " + getRisk();
+}
+
+/* ---------------- AI RISK ENGINE (UPGRADED) ---------------- */
+function getRisk(){
+
+  let hour = new Date().getHours();
+
+  if(hour >= 22 || hour <= 5){
+    return "🔴 HIGH RISK (Night Time)";
+  }
+
+  return "🟢 SAFE";
+}
+
+/* ---------------- EMAIL SOS ---------------- */
+function sendEmail(name){
+
+  emailjs.send("SERVICE_ID","TEMPLATE_ID",{
+    name: name,
+    location: "https://maps.google.com/?q=" + lat + "," + long,
+    time: new Date().toLocaleString()
+  });
+
+}
+
+/* ---------------- SOS SYSTEM ---------------- */
+function sos(){
 
   let name = document.getElementById("name").value;
 
-  document.getElementById("msg").innerHTML =
-  "👋 Welcome " + name;
+  document.getElementById("status").innerHTML =
+  "🚨 SOS ACTIVATED... Sending alert...";
 
-  document.getElementById("risk").innerHTML =
-  "Status: SAFE 💚";
+  setTimeout(()=>{
+
+    document.getElementById("status").innerHTML =
+    "🚨 ALERT SENT! Status: " + getRisk();
+
+    sendEmail(name);
+
+    let audio = new Audio("https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg");
+    audio.play().catch(()=>{});
+
+    document.body.style.background = "#7f1d1d";
+
+  },3000);
 
 }
 
-function sos(){
+/* ---------------- LIVE LOCATION ---------------- */
+function startTracking(){
 
-  let msg = document.getElementById("msg");
-  let risk = document.getElementById("risk");
+  tracking = true;
 
-  let count = 5;
+  setInterval(()=>{
 
-  msg.innerHTML = "🚨 PANIC MODE ACTIVATED... " + count;
+    if(!tracking) return;
 
-  let timer = setInterval(() => {
+    navigator.geolocation.getCurrentPosition((pos)=>{
 
-    count--;
+      lat = pos.coords.latitude;
+      long = pos.coords.longitude;
 
-    msg.innerHTML = "🚨 Sending alert in " + count;
-
-    if(count < 0){
-
-      clearInterval(timer);
-
-      msg.innerHTML = "🚨 ALERT SENT! HELP IS ON THE WAY!";
-      risk.innerHTML = "Status: DANGER 🔴";
-
-      // sound
-      let audio = new Audio("https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg");
-      audio.play().catch(()=>{});
-
-      // flash
-      document.body.style.animation = "flash 0.4s 5";
-    }
-
-  }, 1000);
-}
-
-function getLocation(){
-
-  if(navigator.geolocation){
-
-    navigator.geolocation.getCurrentPosition(function(pos){
-
-      document.getElementById("msg").innerHTML =
-      "📍 Location Shared Successfully";
-
-      document.getElementById("risk").innerHTML =
-      "Lat: " + pos.coords.latitude + " | Long: " + pos.coords.longitude;
+      document.getElementById("status").innerHTML =
+      "📍 Live Location: " + lat + "," + long +
+      "<br>Map: https://maps.google.com/?q=" + lat + "," + long +
+      "<br>Status: " + getRisk();
 
     });
 
-  } else {
-    alert("Location not supported");
+  },5000);
+
+}
+
+/* ---------------- VOICE SOS ---------------- */
+function voiceSOS(){
+
+  let recognition = new webkitSpeechRecognition();
+
+  recognition.start();
+
+  recognition.onresult = function(event){
+
+    let text = event.results[0][0].transcript.toLowerCase();
+
+    if(text.includes("help") || text.includes("emergency")){
+      sos();
+    }
+
   }
 
 }
 
+/* ---------------- SHAKE DETECTION ---------------- */
+window.addEventListener("devicemotion", function(e){
+
+  if(e.acceleration.x > 15 || e.acceleration.y > 15){
+    sos();
+  }
+
+});
+
 </script>
 
 </body>
-
 </html>
