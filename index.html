@@ -21,6 +21,7 @@
       padding:25px;
       border-radius:18px;
       box-shadow:0 0 35px #ef4444;
+      transition:0.3s;
     }
 
     h1{ color:#ef4444; }
@@ -31,6 +32,7 @@
       border:none;
       border-radius:10px;
       margin-top:10px;
+      outline:none;
     }
 
     button{
@@ -41,6 +43,7 @@
       border-radius:10px;
       cursor:pointer;
       color:white;
+      font-size:14px;
     }
 
     .login{ background:#3b82f6; }
@@ -63,7 +66,6 @@
       font-weight:bold;
       font-size:14px;
     }
-
   </style>
 </head>
 
@@ -74,7 +76,7 @@
   <h1>🚨 SafeHer Shield AI</h1>
 
   <input id="name" placeholder="Enter Name">
-  <input id="phone" placeholder="Enter Contact (for SOS email)">
+  <input id="phone" placeholder="Enter Email / Contact for SOS">
 
   <button class="login" onclick="login()">Login</button>
   <button class="sos" onclick="sos()">PANIC SOS</button>
@@ -85,8 +87,8 @@
   <div id="status" class="status"></div>
 
   <div class="panel">
-    <p>📞 Emergency Contacts (Editable later via Firebase)</p>
-    <p id="contacts">Mom: 9876543210 | Friend: 9123456780 | Police: 112</p>
+    <p>📞 Emergency Contacts</p>
+    <p>Mom: 9876543210 | Friend: 9123456780 | Police: 112</p>
   </div>
 
 </div>
@@ -96,40 +98,40 @@ emailjs.init("YOUR_PUBLIC_KEY");
 
 let lat = 0;
 let long = 0;
+let stealthActive = false;
 
 /* ---------------- AI RISK ENGINE ---------------- */
 function getRisk(){
-
   let hour = new Date().getHours();
 
   if(hour >= 22 || hour <= 5){
     return "🔴 HIGH RISK (Night Time)";
   }
-
   return "🟢 SAFE";
 }
 
 /* ---------------- LOGIN ---------------- */
 function login(){
-
   let name = document.getElementById("name").value;
 
   document.getElementById("status").innerHTML =
   "👋 Welcome " + name + " | Status: " + getRisk();
 }
 
-/* ---------------- EMAIL SOS ---------------- */
+/* ---------------- EMAIL SOS (FIXED) ---------------- */
 function sendEmail(name){
+
+  let contact = document.getElementById("phone").value;
 
   emailjs.send("SERVICE_ID","TEMPLATE_ID",{
     name: name,
+    contact: contact,
     location: `https://maps.google.com/?q=${lat},${long}`,
     time: new Date().toLocaleString()
   }).catch(err=>console.log(err));
-
 }
 
-/* ---------------- FIXED SOS ---------------- */
+/* ---------------- SOS SYSTEM ---------------- */
 function sos(){
 
   let name = document.getElementById("name").value;
@@ -152,7 +154,7 @@ function sos(){
   },2000);
 }
 
-/* ---------------- FIXED LOCATION (watchPosition) ---------------- */
+/* ---------------- FIXED LIVE LOCATION ---------------- */
 function startTracking(){
 
   if(navigator.geolocation){
@@ -177,17 +179,25 @@ function startTracking(){
 /* ---------------- FIXED VOICE SOS ---------------- */
 function voiceSOS(){
 
+  if(!('webkitSpeechRecognition' in window)){
+    alert("Voice not supported in this browser");
+    return;
+  }
+
   let recognition = new webkitSpeechRecognition();
   recognition.continuous = false;
+  recognition.lang = "en-US";
 
   recognition.onresult = function(event){
 
     let text = event.results[0][0].transcript.toLowerCase();
 
-    if(text.includes("help") || text.includes("emergency")){
+    document.getElementById("status").innerHTML =
+    "🎙️ Heard: " + text;
+
+    if(text.includes("help") || text.includes("emergency") || text.includes("sos")){
       sos();
     }
-
   };
 
   recognition.start();
@@ -202,15 +212,21 @@ window.addEventListener("devicemotion", function(e){
 
 });
 
-/* ---------------- STEALTH MODE ---------------- */
+/* ---------------- STEALTH MODE (FIXED) ---------------- */
 function stealthMode(){
 
-  document.getElementById("name").value = "";
-  document.getElementById("status").innerHTML = "";
+  stealthActive = !stealthActive;
 
-  document.querySelector(".card").style.display = "none";
-
-  alert("Stealth Mode Activated (Background SOS Active)");
+  if(stealthActive){
+    document.querySelector(".card").style.opacity = "0.05";
+    document.getElementById("status").innerHTML =
+    "🕵️ Stealth Mode ON (Background SOS Active)";
+  }
+  else{
+    document.querySelector(".card").style.opacity = "1";
+    document.getElementById("status").innerHTML =
+    "👁️ Stealth Mode OFF";
+  }
 }
 
 </script>
