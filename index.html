@@ -41,19 +41,13 @@
       border-radius:10px;
       cursor:pointer;
       color:white;
-      font-size:14px;
     }
 
     .login{ background:#3b82f6; }
     .sos{ background:#ef4444; }
     .loc{ background:#22c55e; }
     .voice{ background:#a855f7; }
-
-    .status{
-      margin-top:15px;
-      font-weight:bold;
-      font-size:14px;
-    }
+    .stealth{ background:#f59e0b; }
 
     .panel{
       margin-top:15px;
@@ -62,6 +56,12 @@
       border-radius:10px;
       text-align:left;
       font-size:13px;
+    }
+
+    .status{
+      margin-top:15px;
+      font-weight:bold;
+      font-size:14px;
     }
 
   </style>
@@ -73,20 +73,20 @@
 
   <h1>🚨 SafeHer Shield AI</h1>
 
-  <input id="name" placeholder="Enter your name">
+  <input id="name" placeholder="Enter Name">
+  <input id="phone" placeholder="Enter Contact (for SOS email)">
 
   <button class="login" onclick="login()">Login</button>
   <button class="sos" onclick="sos()">PANIC SOS</button>
   <button class="loc" onclick="startTracking()">LIVE LOCATION</button>
   <button class="voice" onclick="voiceSOS()">VOICE SOS</button>
+  <button class="stealth" onclick="stealthMode()">STEALTH MODE</button>
 
   <div id="status" class="status"></div>
 
   <div class="panel">
-    <p>📞 Emergency Contacts</p>
-    <p>Mom: 9876543210</p>
-    <p>Friend: 9123456780</p>
-    <p>Police: 112</p>
+    <p>📞 Emergency Contacts (Editable later via Firebase)</p>
+    <p id="contacts">Mom: 9876543210 | Friend: 9123456780 | Police: 112</p>
   </div>
 
 </div>
@@ -94,18 +94,10 @@
 <script>
 emailjs.init("YOUR_PUBLIC_KEY");
 
-let lat = 0, long = 0;
-let tracking = false;
+let lat = 0;
+let long = 0;
 
-/* ---------------- LOGIN ---------------- */
-function login(){
-  let name = document.getElementById("name").value;
-
-  document.getElementById("status").innerHTML =
-  "👋 Welcome " + name + " | Status: " + getRisk();
-}
-
-/* ---------------- AI RISK ENGINE (UPGRADED) ---------------- */
+/* ---------------- AI RISK ENGINE ---------------- */
 function getRisk(){
 
   let hour = new Date().getHours();
@@ -117,24 +109,33 @@ function getRisk(){
   return "🟢 SAFE";
 }
 
+/* ---------------- LOGIN ---------------- */
+function login(){
+
+  let name = document.getElementById("name").value;
+
+  document.getElementById("status").innerHTML =
+  "👋 Welcome " + name + " | Status: " + getRisk();
+}
+
 /* ---------------- EMAIL SOS ---------------- */
 function sendEmail(name){
 
   emailjs.send("SERVICE_ID","TEMPLATE_ID",{
     name: name,
-    location: "https://maps.google.com/?q=" + lat + "," + long,
+    location: `https://maps.google.com/?q=${lat},${long}`,
     time: new Date().toLocaleString()
-  });
+  }).catch(err=>console.log(err));
 
 }
 
-/* ---------------- SOS SYSTEM ---------------- */
+/* ---------------- FIXED SOS ---------------- */
 function sos(){
 
   let name = document.getElementById("name").value;
 
   document.getElementById("status").innerHTML =
-  "🚨 SOS ACTIVATED... Sending alert...";
+  "🚨 SOS ACTIVATED... Sending alerts...";
 
   setTimeout(()=>{
 
@@ -148,41 +149,36 @@ function sos(){
 
     document.body.style.background = "#7f1d1d";
 
-  },3000);
-
+  },2000);
 }
 
-/* ---------------- LIVE LOCATION ---------------- */
+/* ---------------- FIXED LOCATION (watchPosition) ---------------- */
 function startTracking(){
 
-  tracking = true;
+  if(navigator.geolocation){
 
-  setInterval(()=>{
-
-    if(!tracking) return;
-
-    navigator.geolocation.getCurrentPosition((pos)=>{
+    navigator.geolocation.watchPosition((pos)=>{
 
       lat = pos.coords.latitude;
       long = pos.coords.longitude;
 
       document.getElementById("status").innerHTML =
-      "📍 Live Location: " + lat + "," + long +
-      "<br>Map: https://maps.google.com/?q=" + lat + "," + long +
-      "<br>Status: " + getRisk();
+      `📍 Live Location: ${lat}, ${long}
+      <br>Map: https://maps.google.com/?q=${lat},${long}
+      <br>Status: ${getRisk()}`;
 
     });
 
-  },5000);
-
+  } else {
+    alert("Location not supported");
+  }
 }
 
-/* ---------------- VOICE SOS ---------------- */
+/* ---------------- FIXED VOICE SOS ---------------- */
 function voiceSOS(){
 
   let recognition = new webkitSpeechRecognition();
-
-  recognition.start();
+  recognition.continuous = false;
 
   recognition.onresult = function(event){
 
@@ -192,11 +188,12 @@ function voiceSOS(){
       sos();
     }
 
-  }
+  };
 
+  recognition.start();
 }
 
-/* ---------------- SHAKE DETECTION ---------------- */
+/* ---------------- SHAKE SOS ---------------- */
 window.addEventListener("devicemotion", function(e){
 
   if(e.acceleration.x > 15 || e.acceleration.y > 15){
@@ -204,6 +201,17 @@ window.addEventListener("devicemotion", function(e){
   }
 
 });
+
+/* ---------------- STEALTH MODE ---------------- */
+function stealthMode(){
+
+  document.getElementById("name").value = "";
+  document.getElementById("status").innerHTML = "";
+
+  document.querySelector(".card").style.display = "none";
+
+  alert("Stealth Mode Activated (Background SOS Active)");
+}
 
 </script>
 
