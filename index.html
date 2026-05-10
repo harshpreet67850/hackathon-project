@@ -66,6 +66,12 @@
       font-weight:bold;
       font-size:14px;
     }
+
+    #fakeScreen{
+      margin-top:120px;
+      font-size:18px;
+      color:#22c55e;
+    }
   </style>
 </head>
 
@@ -94,16 +100,16 @@
 </div>
 
 <script>
+
 emailjs.init("YOUR_PUBLIC_KEY");
 
 let lat = 0;
 let long = 0;
 let stealthActive = false;
 
-/* ---------------- AI RISK ENGINE ---------------- */
+/* ---------------- RISK ENGINE ---------------- */
 function getRisk(){
   let hour = new Date().getHours();
-
   if(hour >= 22 || hour <= 5){
     return "🔴 HIGH RISK (Night Time)";
   }
@@ -118,7 +124,7 @@ function login(){
   "👋 Welcome " + name + " | Status: " + getRisk();
 }
 
-/* ---------------- EMAIL SOS (FIXED) ---------------- */
+/* ---------------- EMAIL SOS ---------------- */
 function sendEmail(name){
 
   let contact = document.getElementById("phone").value;
@@ -128,10 +134,10 @@ function sendEmail(name){
     contact: contact,
     location: `https://maps.google.com/?q=${lat},${long}`,
     time: new Date().toLocaleString()
-  }).catch(err=>console.log(err));
+  }).catch(err=>console.log("Email error:", err));
 }
 
-/* ---------------- SOS SYSTEM ---------------- */
+/* ---------------- SOS ---------------- */
 function sos(){
 
   let name = document.getElementById("name").value;
@@ -151,16 +157,19 @@ function sos(){
 
     document.body.style.background = "#7f1d1d";
 
-  },2000);
+  },1500);
 }
 
-/* ---------------- FIXED LIVE LOCATION ---------------- */
+/* ---------------- LIVE LOCATION FIXED ---------------- */
 function startTracking(){
 
-  if(navigator.geolocation){
+  if(!navigator.geolocation){
+    alert("Geolocation not supported");
+    return;
+  }
 
-    navigator.geolocation.watchPosition((pos)=>{
-
+  navigator.geolocation.watchPosition(
+    (pos)=>{
       lat = pos.coords.latitude;
       long = pos.coords.longitude;
 
@@ -168,23 +177,27 @@ function startTracking(){
       `📍 Live Location: ${lat}, ${long}
       <br>Map: https://maps.google.com/?q=${lat},${long}
       <br>Status: ${getRisk()}`;
-
-    });
-
-  } else {
-    alert("Location not supported");
-  }
+    },
+    (err)=>{
+      console.log(err);
+      alert("❌ Location permission denied or unavailable");
+    },
+    { enableHighAccuracy: true }
+  );
 }
 
-/* ---------------- FIXED VOICE SOS ---------------- */
+/* ---------------- VOICE SOS FIXED ---------------- */
 function voiceSOS(){
 
-  if(!('webkitSpeechRecognition' in window)){
+  let SpeechRecognition =
+    window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  if(!SpeechRecognition){
     alert("Voice not supported in this browser");
     return;
   }
 
-  let recognition = new webkitSpeechRecognition();
+  let recognition = new SpeechRecognition();
   recognition.continuous = false;
   recognition.lang = "en-US";
 
@@ -212,18 +225,30 @@ window.addEventListener("devicemotion", function(e){
 
 });
 
-/* ---------------- STEALTH MODE (FIXED) ---------------- */
+/* ---------------- STEALTH MODE FIXED ---------------- */
 function stealthMode(){
 
   stealthActive = !stealthActive;
 
   if(stealthActive){
-    document.querySelector(".card").style.opacity = "0.05";
+
+    document.querySelector(".card").style.display = "none";
+
+    if(!document.getElementById("fakeScreen")){
+      let fake = document.createElement("div");
+      fake.id = "fakeScreen";
+      fake.innerHTML = "📱 System Running...";
+      document.body.appendChild(fake);
+    }
+
     document.getElementById("status").innerHTML =
-    "🕵️ Stealth Mode ON (Background SOS Active)";
+    "🕵️ Stealth Mode ON (SOS ACTIVE IN BACKGROUND)";
   }
   else{
-    document.querySelector(".card").style.opacity = "1";
+
+    document.querySelector(".card").style.display = "block";
+    document.getElementById("fakeScreen")?.remove();
+
     document.getElementById("status").innerHTML =
     "👁️ Stealth Mode OFF";
   }
