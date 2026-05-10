@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>SafeHer Shield AI ULTRA</title>
+<title>SafeHer Shield FINAL</title>
 
 <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
 
@@ -52,33 +52,27 @@ button{
 .voice{ background:#a855f7; }
 .stealth{ background:#f59e0b; }
 
-/* ⚡ ALERT FLASH */
-.alert-bg{
-  background:#3b0000 !important;
-  animation:flash 0.3s infinite;
-}
-
-@keyframes flash{
-  0%{background:#3b0000;}
-  50%{background:#0b1220;}
-  100%{background:#3b0000;}
-}
-
-/* 📢 TOAST */
-.toast{
+/* 🚨 FULL SCREEN ALERT */
+.alert-screen{
   position:fixed;
-  top:20px;
-  left:50%;
-  transform:translateX(-50%);
-  background:#ef4444;
-  padding:12px 20px;
-  border-radius:10px;
-  font-weight:bold;
+  top:0; left:0;
+  width:100%;
+  height:100%;
+  background:rgba(120,0,0,0.95);
   display:none;
-  z-index:999;
+  justify-content:center;
+  align-items:center;
+  flex-direction:column;
+  z-index:9999;
+  text-align:center;
 }
 
-/* ✅ SUCCESS */
+.alert-box{
+  font-size:22px;
+  font-weight:bold;
+}
+
+/* SUCCESS */
 .success{
   position:fixed;
   bottom:20px;
@@ -89,10 +83,26 @@ button{
   font-weight:bold;
 }
 
-/* 📍 STATUS */
-.status{
-  margin-top:15px;
+/* ERROR */
+.error{
+  position:fixed;
+  bottom:20px;
+  right:20px;
+  background:#ef4444;
+  padding:10px 15px;
+  border-radius:10px;
   font-weight:bold;
+}
+
+/* FLASH */
+.flash{
+  animation:flash 0.2s infinite;
+}
+
+@keyframes flash{
+  0%{background:#0b1220;}
+  50%{background:#2a0000;}
+  100%{background:#0b1220;}
 }
 
 </style>
@@ -100,11 +110,9 @@ button{
 
 <body>
 
-<div class="toast" id="toast">🚨 DANGER DETECTED</div>
-
 <div class="card">
 
-<h1>🚨 SafeHer Shield ULTRA</h1>
+<h1>🚨 SafeHer Shield FINAL</h1>
 
 <input id="name" placeholder="Enter Name">
 <input id="phone" placeholder="Email / Contact">
@@ -118,8 +126,11 @@ button{
 <input id="manualSOS" placeholder="Type SOS here">
 <button onclick="textSOS()">TYPE SOS</button>
 
-<div id="status" class="status"></div>
+</div>
 
+<!-- ALERT UI -->
+<div class="alert-screen" id="alertBox">
+  <div class="alert-box" id="alertText">🚨 EMERGENCY DETECTED</div>
 </div>
 
 <script>
@@ -128,41 +139,43 @@ emailjs.init("YOUR_PUBLIC_KEY");
 
 let lat=0,long=0,stealth=false;
 
-/* 🔊 LOUD SIREN (loop) */
-let alarm;
-
-function playAlarm(){
-
-  if(alarm) return;
-
-  alarm = new Audio("https://actions.google.com/sounds/v1/emergency/beeper_emergency_call.ogg");
-  alarm.loop = true;
-  alarm.volume = 1.0;
-  alarm.play();
-}
-
-/* STOP SOUND */
-function stopAlarm(){
-  if(alarm){
-    alarm.pause();
-    alarm = null;
-  }
-}
+/* 🔊 HIGH IMPACT SIREN (single burst + strong volume) */
+let siren = new Audio("https://actions.google.com/sounds/v1/emergency/emergency_siren_short.ogg");
+siren.volume = 1.0;
 
 /* 📳 VIBRATION */
 function vibrate(){
   if(navigator.vibrate){
-    navigator.vibrate([500,300,500,300,800]);
+    navigator.vibrate([600,300,600,300,900]);
   }
 }
 
-/* 📢 TOAST */
-function showToast(msg){
-  let t=document.getElementById("toast");
-  t.innerText=msg;
-  t.style.display="block";
+/* 🚨 SHOW ALERT SCREEN */
+function showAlert(text){
+  let box=document.getElementById("alertBox");
+  let msg=document.getElementById("alertText");
 
-  setTimeout(()=>t.style.display="none",3000);
+  msg.innerHTML=text;
+  box.style.display="flex";
+}
+
+/* ❌ HIDE ALERT */
+function hideAlert(){
+  document.getElementById("alertBox").style.display="none";
+}
+
+/* 📧 SEND SOS */
+function sendSOS(){
+
+  let name=document.getElementById("name").value;
+  let contact=document.getElementById("phone").value;
+
+  return emailjs.send("SERVICE_ID","TEMPLATE_ID",{
+    name:name,
+    contact:contact,
+    location:`https://maps.google.com/?q=${lat},${long}`,
+    time:new Date().toLocaleString()
+  });
 }
 
 /* 🧠 STATUS */
@@ -174,63 +187,33 @@ function getRiskScore(){
   if(lat!==0 && long!==0) score+=20;
   if(stealth) score+=10;
 
-  if(score>=70) return "🔴 EXTREME DANGER ("+score+")";
-  if(score>=40) return "🟠 MEDIUM DANGER ("+score+")";
-  return "🟢 SAFE ("+score+")";
+  if(score>=70) return "🔴 EXTREME DANGER";
+  if(score>=40) return "🟠 MEDIUM RISK";
+  return "🟢 SAFE";
 }
 
-/* LOGIN */
-function login(){
-  let name=document.getElementById("name").value;
-  document.getElementById("status").innerHTML=
-  "👋 Welcome "+name+" | "+getRiskScore();
-}
-
-/* 📧 SEND SOS */
-function sendSOS(){
-
-  let name=document.getElementById("name").value;
-  let contact=document.getElementById("phone").value;
-
-  emailjs.send("SERVICE_ID","TEMPLATE_ID",{
-    name:name,
-    contact:contact,
-    location:`https://maps.google.com/?q=${lat},${long}`,
-    time:new Date().toLocaleString()
-  }).then(()=>{
-
-    showSuccess("✅ SOS SENT SUCCESSFULLY");
-
-  }).catch(()=>{
-    showSuccess("❌ FAILED TO SEND SOS");
-  });
-}
-
-/* SUCCESS BADGE */
-function showSuccess(msg){
-  let s=document.createElement("div");
-  s.className="success";
-  s.innerText=msg;
-  document.body.appendChild(s);
-
-  setTimeout(()=>s.remove(),4000);
-}
-
-/* 🚨 SOS */
+/* 🚨 MAIN SOS */
 function sos(){
 
-  document.body.classList.add("alert-bg");
+  document.body.classList.add("flash");
 
-  playAlarm();
+  siren.currentTime = 0;
+  siren.play().catch(()=>{});
+
   vibrate();
-  showToast("🚨 EMERGENCY DETECTED");
-
-  document.getElementById("status").innerHTML=
-  "🚨 SOS ACTIVE... "+getRiskScore();
+  showAlert("🚨 SOS ACTIVATED<br>"+getRiskScore());
 
   setTimeout(()=>{
-    sendSOS();
-  },1500);
+
+    sendSOS()
+    .then(()=>{
+      showSuccess("SOS SENT SUCCESSFULLY");
+    })
+    .catch(()=>{
+      showError("SOS FAILED ❌ CHECK EMAILJS");
+    });
+
+  },1200);
 }
 
 /* 📍 LOCATION */
@@ -240,11 +223,8 @@ function startTracking(){
     (pos)=>{
       lat=pos.coords.latitude;
       long=pos.coords.longitude;
-
-      document.getElementById("status").innerHTML=
-      `📍 ${lat},${long}<br>${getRiskScore()}`;
     },
-    ()=>alert("Location blocked"),
+    ()=>showError("LOCATION BLOCKED ❌"),
     {enableHighAccuracy:true}
   );
 }
@@ -277,18 +257,25 @@ function textSOS(){
 /* STEALTH */
 function stealthMode(){
   stealth=!stealth;
+  document.querySelector(".card").style.display = stealth ? "none" : "block";
+}
 
-  if(stealth){
-    document.querySelector(".card").style.display="none";
+/* SUCCESS */
+function showSuccess(msg){
+  let d=document.createElement("div");
+  d.className="success";
+  d.innerText=msg;
+  document.body.appendChild(d);
+  setTimeout(()=>d.remove(),4000);
+}
 
-    let fake=document.createElement("div");
-    fake.innerHTML="📱 System Running Secure Mode...";
-    fake.id="fakeScreen";
-    document.body.appendChild(fake);
-  }else{
-    document.querySelector(".card").style.display="block";
-    document.getElementById("fakeScreen")?.remove();
-  }
+/* ERROR */
+function showError(msg){
+  let d=document.createElement("div");
+  d.className="error";
+  d.innerText=msg;
+  document.body.appendChild(d);
+  setTimeout(()=>d.remove(),4000);
 }
 
 </script>
