@@ -1,18 +1,19 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>SafeHer Shield AI PRO+</title>
+<title>SafeHer Shield AI ULTRA</title>
 
 <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
 
 <style>
+
 body{
   background:#0b1220;
   color:white;
   font-family:Arial;
   text-align:center;
   padding:20px;
-  transition:0.5s;
+  transition:0.3s;
 }
 
 .card{
@@ -50,30 +51,60 @@ button{
 .loc{ background:#22c55e; }
 .voice{ background:#a855f7; }
 .stealth{ background:#f59e0b; }
-.call{ background:#f97316; }
 
+/* ⚡ ALERT FLASH */
+.alert-bg{
+  background:#3b0000 !important;
+  animation:flash 0.3s infinite;
+}
+
+@keyframes flash{
+  0%{background:#3b0000;}
+  50%{background:#0b1220;}
+  100%{background:#3b0000;}
+}
+
+/* 📢 TOAST */
+.toast{
+  position:fixed;
+  top:20px;
+  left:50%;
+  transform:translateX(-50%);
+  background:#ef4444;
+  padding:12px 20px;
+  border-radius:10px;
+  font-weight:bold;
+  display:none;
+  z-index:999;
+}
+
+/* ✅ SUCCESS */
+.success{
+  position:fixed;
+  bottom:20px;
+  right:20px;
+  background:#22c55e;
+  padding:10px 15px;
+  border-radius:10px;
+  font-weight:bold;
+}
+
+/* 📍 STATUS */
 .status{
   margin-top:15px;
   font-weight:bold;
-  font-size:14px;
 }
 
-#fakeScreen{
-  margin-top:120px;
-  font-size:18px;
-  color:#22c55e;
-}
-
-.alert-bg{
-  background:#7f1d1d !important;
-}
 </style>
 </head>
 
 <body>
 
+<div class="toast" id="toast">🚨 DANGER DETECTED</div>
+
 <div class="card">
-<h1>🚨 SafeHer Shield AI PRO+</h1>
+
+<h1>🚨 SafeHer Shield ULTRA</h1>
 
 <input id="name" placeholder="Enter Name">
 <input id="phone" placeholder="Email / Contact">
@@ -83,12 +114,12 @@ button{
 <button class="loc" onclick="startTracking()">📍 LIVE LOCATION</button>
 <button class="voice" onclick="voiceSOS()">🎙️ VOICE SOS</button>
 <button class="stealth" onclick="stealthMode()">🕵️ STEALTH MODE</button>
-<button class="call" onclick="window.location.href='tel:112'">📞 EMERGENCY CALL</button>
 
 <input id="manualSOS" placeholder="Type SOS here">
 <button onclick="textSOS()">TYPE SOS</button>
 
 <div id="status" class="status"></div>
+
 </div>
 
 <script>
@@ -97,31 +128,44 @@ emailjs.init("YOUR_PUBLIC_KEY");
 
 let lat=0,long=0,stealth=false;
 
-/* 🔊 ALERT SOUND */
+/* 🔊 LOUD SIREN (loop) */
+let alarm;
+
 function playAlarm(){
-  let audio = new Audio("https://actions.google.com/sounds/v1/emergency/beeper_emergency_call.ogg");
-  audio.play();
+
+  if(alarm) return;
+
+  alarm = new Audio("https://actions.google.com/sounds/v1/emergency/beeper_emergency_call.ogg");
+  alarm.loop = true;
+  alarm.volume = 1.0;
+  alarm.play();
+}
+
+/* STOP SOUND */
+function stopAlarm(){
+  if(alarm){
+    alarm.pause();
+    alarm = null;
+  }
 }
 
 /* 📳 VIBRATION */
 function vibrate(){
   if(navigator.vibrate){
-    navigator.vibrate([300,200,300,200,500]);
+    navigator.vibrate([500,300,500,300,800]);
   }
 }
 
-/* 🔔 NOTIFICATION */
-function notify(msg){
-  if("Notification" in window){
-    Notification.requestPermission().then(p=>{
-      if(p==="granted"){
-        new Notification("SafeHer Alert 🚨",{body:msg});
-      }
-    });
-  }
+/* 📢 TOAST */
+function showToast(msg){
+  let t=document.getElementById("toast");
+  t.innerText=msg;
+  t.style.display="block";
+
+  setTimeout(()=>t.style.display="none",3000);
 }
 
-/* 🧠 RISK ENGINE */
+/* 🧠 STATUS */
 function getRiskScore(){
   let score=0;
   let hour=new Date().getHours();
@@ -138,19 +182,15 @@ function getRiskScore(){
 /* LOGIN */
 function login(){
   let name=document.getElementById("name").value;
-
   document.getElementById("status").innerHTML=
   "👋 Welcome "+name+" | "+getRiskScore();
 }
 
-/* 📧 EMAIL SEND */
+/* 📧 SEND SOS */
 function sendSOS(){
 
   let name=document.getElementById("name").value;
   let contact=document.getElementById("phone").value;
-
-  document.getElementById("status").innerHTML=
-  "📡 Sending SOS via EmailJS to: "+contact;
 
   emailjs.send("SERVICE_ID","TEMPLATE_ID",{
     name:name,
@@ -158,36 +198,43 @@ function sendSOS(){
     location:`https://maps.google.com/?q=${lat},${long}`,
     time:new Date().toLocaleString()
   }).then(()=>{
-    document.getElementById("status").innerHTML="✅ SOS SENT SUCCESSFULLY";
+
+    showSuccess("✅ SOS SENT SUCCESSFULLY");
+
   }).catch(()=>{
-    document.getElementById("status").innerHTML="❌ SOS FAILED";
+    showSuccess("❌ FAILED TO SEND SOS");
   });
 }
 
-/* 🚨 SOS CORE */
+/* SUCCESS BADGE */
+function showSuccess(msg){
+  let s=document.createElement("div");
+  s.className="success";
+  s.innerText=msg;
+  document.body.appendChild(s);
+
+  setTimeout(()=>s.remove(),4000);
+}
+
+/* 🚨 SOS */
 function sos(){
 
   document.body.classList.add("alert-bg");
 
   playAlarm();
   vibrate();
-  notify("Emergency detected!");
-  
+  showToast("🚨 EMERGENCY DETECTED");
+
   document.getElementById("status").innerHTML=
-  "🚨 SOS ACTIVATED... "+getRiskScore();
+  "🚨 SOS ACTIVE... "+getRiskScore();
 
   setTimeout(()=>{
     sendSOS();
-  },1200);
+  },1500);
 }
 
 /* 📍 LOCATION */
 function startTracking(){
-
-  if(!navigator.geolocation){
-    alert("Not supported");
-    return;
-  }
 
   navigator.geolocation.watchPosition(
     (pos)=>{
@@ -206,12 +253,6 @@ function startTracking(){
 function voiceSOS(){
 
   let SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-
-  if(!SR){
-    alert("Use Chrome Desktop");
-    return;
-  }
-
   let rec=new SR();
   rec.lang="en-US";
 
@@ -225,7 +266,7 @@ function voiceSOS(){
   rec.start();
 }
 
-/* 📝 TEXT SOS */
+/* TEXT */
 function textSOS(){
   let v=document.getElementById("manualSOS").value.toLowerCase();
   if(v.includes("sos")||v.includes("help")||v.includes("emergency")){
@@ -233,20 +274,18 @@ function textSOS(){
   }
 }
 
-/* 🕵️ STEALTH MODE */
+/* STEALTH */
 function stealthMode(){
-
   stealth=!stealth;
 
   if(stealth){
     document.querySelector(".card").style.display="none";
 
     let fake=document.createElement("div");
-    fake.id="fakeScreen";
     fake.innerHTML="📱 System Running Secure Mode...";
+    fake.id="fakeScreen";
     document.body.appendChild(fake);
-  }
-  else{
+  }else{
     document.querySelector(".card").style.display="block";
     document.getElementById("fakeScreen")?.remove();
   }
