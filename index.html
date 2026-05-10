@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>SafeHer Shield AI</title>
+  <title>SafeHer Shield AI PRO</title>
 
   <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
 
@@ -21,7 +21,6 @@
       padding:25px;
       border-radius:18px;
       box-shadow:0 0 35px #ef4444;
-      transition:0.3s;
     }
 
     h1{ color:#ef4444; }
@@ -32,7 +31,6 @@
       border:none;
       border-radius:10px;
       margin-top:10px;
-      outline:none;
     }
 
     button{
@@ -43,7 +41,6 @@
       border-radius:10px;
       cursor:pointer;
       color:white;
-      font-size:14px;
     }
 
     .login{ background:#3b82f6; }
@@ -52,19 +49,9 @@
     .voice{ background:#a855f7; }
     .stealth{ background:#f59e0b; }
 
-    .panel{
-      margin-top:15px;
-      background:#0f172a;
-      padding:12px;
-      border-radius:10px;
-      text-align:left;
-      font-size:13px;
-    }
-
     .status{
       margin-top:15px;
       font-weight:bold;
-      font-size:14px;
     }
 
     #fakeScreen{
@@ -79,23 +66,21 @@
 
 <div class="card">
 
-  <h1>🚨 SafeHer Shield AI</h1>
+  <h1>🚨 SafeHer Shield AI PRO</h1>
 
   <input id="name" placeholder="Enter Name">
-  <input id="phone" placeholder="Enter Email / Contact for SOS">
+  <input id="phone" placeholder="Email / Contact">
 
   <button class="login" onclick="login()">Login</button>
-  <button class="sos" onclick="sos()">PANIC SOS</button>
-  <button class="loc" onclick="startTracking()">LIVE LOCATION</button>
-  <button class="voice" onclick="voiceSOS()">VOICE SOS</button>
-  <button class="stealth" onclick="stealthMode()">STEALTH MODE</button>
+  <button class="sos" onclick="sos()">🚨 PANIC SOS</button>
+  <button class="loc" onclick="startTracking()">📍 LIVE LOCATION</button>
+  <button class="voice" onclick="voiceSOS()">🎙️ VOICE SOS</button>
+  <button class="stealth" onclick="stealthMode()">🕵️ STEALTH MODE</button>
+
+  <input id="manualSOS" placeholder="Type SOS here (backup)">
+  <button onclick="textSOS()">TYPE SOS</button>
 
   <div id="status" class="status"></div>
-
-  <div class="panel">
-    <p>📞 Emergency Contacts</p>
-    <p>Mom: 9876543210 | Friend: 9123456780 | Police: 112</p>
-  </div>
 
 </div>
 
@@ -103,154 +88,123 @@
 
 emailjs.init("YOUR_PUBLIC_KEY");
 
-let lat = 0;
-let long = 0;
-let stealthActive = false;
-
-/* ---------------- RISK ENGINE ---------------- */
-function getRisk(){
-  let hour = new Date().getHours();
-  if(hour >= 22 || hour <= 5){
-    return "🔴 HIGH RISK (Night Time)";
-  }
-  return "🟢 SAFE";
-}
+let lat=0,long=0,stealth=false;
 
 /* ---------------- LOGIN ---------------- */
 function login(){
-  let name = document.getElementById("name").value;
-
-  document.getElementById("status").innerHTML =
-  "👋 Welcome " + name + " | Status: " + getRisk();
+  let name=document.getElementById("name").value;
+  document.getElementById("status").innerHTML=
+  "👋 Welcome "+name+" | Risk: "+getRisk();
 }
 
-/* ---------------- EMAIL SOS ---------------- */
-function sendEmail(name){
+/* ---------------- AI RISK ---------------- */
+function getRisk(){
+  let h=new Date().getHours();
+  return (h>=22||h<=5)?"🔴 HIGH RISK":"🟢 SAFE";
+}
 
-  let contact = document.getElementById("phone").value;
+/* ---------------- SOS CORE ---------------- */
+function sendSOS(){
+
+  let name=document.getElementById("name").value;
+  let contact=document.getElementById("phone").value;
 
   emailjs.send("SERVICE_ID","TEMPLATE_ID",{
-    name: name,
-    contact: contact,
-    location: `https://maps.google.com/?q=${lat},${long}`,
-    time: new Date().toLocaleString()
-  }).catch(err=>console.log("Email error:", err));
+    name:name,
+    contact:contact,
+    location:`https://maps.google.com/?q=${lat},${long}`,
+    time:new Date().toLocaleString()
+  });
+
+  let audio=new Audio("https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg");
+  audio.play().catch(()=>{});
 }
 
-/* ---------------- SOS ---------------- */
+/* ---------------- BUTTON SOS ---------------- */
 function sos(){
-
-  let name = document.getElementById("name").value;
-
-  document.getElementById("status").innerHTML =
-  "🚨 SOS ACTIVATED... Sending alerts...";
-
+  document.getElementById("status").innerHTML="🚨 SOS ACTIVATED...";
   setTimeout(()=>{
-
-    document.getElementById("status").innerHTML =
-    "🚨 ALERT SENT! Status: " + getRisk();
-
-    sendEmail(name);
-
-    let audio = new Audio("https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg");
-    audio.play().catch(()=>{});
-
-    document.body.style.background = "#7f1d1d";
-
-  },1500);
+    sendSOS();
+    document.getElementById("status").innerHTML="🚨 ALERT SENT!";
+  },1200);
 }
 
-/* ---------------- LIVE LOCATION FIXED ---------------- */
+/* ---------------- LIVE LOCATION ---------------- */
 function startTracking(){
 
   if(!navigator.geolocation){
-    alert("Geolocation not supported");
+    alert("Not supported");
     return;
   }
 
   navigator.geolocation.watchPosition(
     (pos)=>{
-      lat = pos.coords.latitude;
-      long = pos.coords.longitude;
+      lat=pos.coords.latitude;
+      long=pos.coords.longitude;
 
-      document.getElementById("status").innerHTML =
-      `📍 Live Location: ${lat}, ${long}
-      <br>Map: https://maps.google.com/?q=${lat},${long}
-      <br>Status: ${getRisk()}`;
+      document.getElementById("status").innerHTML=
+      `📍 ${lat},${long}<br>${getRisk()}`;
     },
-    (err)=>{
-      console.log(err);
-      alert("❌ Location permission denied or unavailable");
-    },
-    { enableHighAccuracy: true }
+    ()=>alert("Location blocked"),
+    {enableHighAccuracy:true}
   );
 }
 
-/* ---------------- VOICE SOS FIXED ---------------- */
+/* ---------------- VOICE SOS FIX ---------------- */
 function voiceSOS(){
 
-  let SpeechRecognition =
-    window.SpeechRecognition || window.webkitSpeechRecognition;
+  let SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 
-  if(!SpeechRecognition){
-    alert("Voice not supported in this browser");
+  if(!SR){
+    alert("Use Chrome Desktop for voice");
     return;
   }
 
-  let recognition = new SpeechRecognition();
-  recognition.continuous = false;
-  recognition.lang = "en-US";
+  let rec=new SR();
+  rec.lang="en-US";
 
-  recognition.onresult = function(event){
-
-    let text = event.results[0][0].transcript.toLowerCase();
-
-    document.getElementById("status").innerHTML =
-    "🎙️ Heard: " + text;
-
-    if(text.includes("help") || text.includes("emergency") || text.includes("sos")){
+  rec.onresult=(e)=>{
+    let text=e.results[0][0].transcript.toLowerCase();
+    document.getElementById("status").innerHTML="🎙️ "+text;
+    if(text.includes("help")||text.includes("sos")||text.includes("emergency")){
       sos();
     }
   };
 
-  recognition.start();
+  rec.start();
+}
+
+/* ---------------- TEXT SOS (FALLBACK) ---------------- */
+function textSOS(){
+  let val=document.getElementById("manualSOS").value.toLowerCase();
+  if(val.includes("sos")||val.includes("help")){
+    sos();
+  }
 }
 
 /* ---------------- SHAKE SOS ---------------- */
-window.addEventListener("devicemotion", function(e){
-
-  if(e.acceleration.x > 15 || e.acceleration.y > 15){
+window.addEventListener("devicemotion",(e)=>{
+  if(e.acceleration.x>15||e.acceleration.y>15){
     sos();
   }
-
 });
 
-/* ---------------- STEALTH MODE FIXED ---------------- */
+/* ---------------- STEALTH MODE ---------------- */
 function stealthMode(){
 
-  stealthActive = !stealthActive;
+  stealth=!stealth;
 
-  if(stealthActive){
+  if(stealth){
+    document.querySelector(".card").style.display="none";
 
-    document.querySelector(".card").style.display = "none";
-
-    if(!document.getElementById("fakeScreen")){
-      let fake = document.createElement("div");
-      fake.id = "fakeScreen";
-      fake.innerHTML = "📱 System Running...";
-      document.body.appendChild(fake);
-    }
-
-    document.getElementById("status").innerHTML =
-    "🕵️ Stealth Mode ON (SOS ACTIVE IN BACKGROUND)";
+    let fake=document.createElement("div");
+    fake.id="fakeScreen";
+    fake.innerHTML="📱 System Running...";
+    document.body.appendChild(fake);
   }
   else{
-
-    document.querySelector(".card").style.display = "block";
+    document.querySelector(".card").style.display="block";
     document.getElementById("fakeScreen")?.remove();
-
-    document.getElementById("status").innerHTML =
-    "👁️ Stealth Mode OFF";
   }
 }
 
