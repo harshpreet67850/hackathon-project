@@ -1,86 +1,94 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>SafeHer Shield AI PRO</title>
+<title>SafeHer Shield AI PRO</title>
 
-  <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
 
-  <style>
-    body{
-      background:#0b1220;
-      color:white;
-      font-family:Arial;
-      text-align:center;
-      padding:20px;
-    }
+<style>
 
-    .card{
-      background:#111827;
-      width:420px;
-      margin:auto;
-      padding:25px;
-      border-radius:18px;
-      box-shadow:0 0 35px #ef4444;
-    }
+body{
+  background:#0b1220;
+  color:white;
+  font-family:Arial;
+  text-align:center;
+  padding:20px;
+  transition:0.5s;
+}
 
-    h1{ color:#ef4444; }
+.card{
+  background:#111827;
+  width:420px;
+  margin:auto;
+  padding:25px;
+  border-radius:18px;
+  box-shadow:0 0 35px #ef4444;
+}
 
-    input{
-      padding:12px;
-      width:80%;
-      border:none;
-      border-radius:10px;
-      margin-top:10px;
-    }
+h1{ color:#ef4444; }
 
-    button{
-      width:85%;
-      margin-top:10px;
-      padding:12px;
-      border:none;
-      border-radius:10px;
-      cursor:pointer;
-      color:white;
-    }
+input{
+  padding:12px;
+  width:80%;
+  border:none;
+  border-radius:10px;
+  margin-top:10px;
+}
 
-    .login{ background:#3b82f6; }
-    .sos{ background:#ef4444; }
-    .loc{ background:#22c55e; }
-    .voice{ background:#a855f7; }
-    .stealth{ background:#f59e0b; }
+button{
+  width:85%;
+  margin-top:10px;
+  padding:12px;
+  border:none;
+  border-radius:10px;
+  cursor:pointer;
+  color:white;
+}
 
-    .status{
-      margin-top:15px;
-      font-weight:bold;
-    }
+.login{ background:#3b82f6; }
+.sos{ background:#ef4444; }
+.loc{ background:#22c55e; }
+.voice{ background:#a855f7; }
+.stealth{ background:#f59e0b; }
 
-    #fakeScreen{
-      margin-top:120px;
-      font-size:18px;
-      color:#22c55e;
-    }
-  </style>
+.status{
+  margin-top:15px;
+  font-weight:bold;
+}
+
+#fakeScreen{
+  margin-top:120px;
+  font-size:18px;
+  color:#22c55e;
+}
+
+/* 🔴 ALERT BACKGROUND FIX */
+.alert-bg{
+  background:#7f1d1d !important;
+}
+
+</style>
 </head>
 
 <body>
 
 <div class="card">
 
-  <h1>🚨 SafeHer Shield AI PRO</h1>
+<h1>🚨 SafeHer Shield AI PRO</h1>
 
-  <input id="name" placeholder="Enter Name">
-  <input id="phone" placeholder="Email / Contact">
+<input id="name" placeholder="Enter Name">
+<input id="phone" placeholder="Email / Contact">
 
-  <button class="login" onclick="login()">Login</button>
-  <button class="sos" onclick="sos()">🚨 PANIC SOS</button>
-  <button class="loc" onclick="startTracking()">📍 LIVE LOCATION</button>
-  <button class="voice" onclick="voiceSOS()">🎙️ VOICE SOS</button>
-  <button class="stealth" onclick="stealthMode()">🕵️ STEALTH MODE</button>
+<button class="login" onclick="login()">Login</button>
+<button class="sos" onclick="sos()">🚨 PANIC SOS</button>
+<button class="loc" onclick="startTracking()">📍 LIVE LOCATION</button>
+<button class="voice" onclick="voiceSOS()">🎙️ VOICE SOS</button>
+<button class="stealth" onclick="stealthMode()">🕵️ STEALTH MODE</button>
 
-  <input id="manualSOS" placeholder="Type SOS here (backup)">
-  <button onclick="textSOS()">TYPE SOS</button>
+<input id="manualSOS" placeholder="Type SOS here (backup)">
+<button onclick="textSOS()">TYPE SOS</button>
 
-  <div id="status" class="status"></div>
+<div id="status" class="status"></div>
 
 </div>
 
@@ -90,17 +98,27 @@ emailjs.init("YOUR_PUBLIC_KEY");
 
 let lat=0,long=0,stealth=false;
 
+/* ---------------- AI DANGER SCORE ---------------- */
+function getRiskScore(){
+
+  let hour=new Date().getHours();
+  let score=0;
+
+  if(hour>=22||hour<=5) score+=60;
+  if(lat!==0 && long!==0) score+=20;
+  if(stealth) score+=10;
+
+  if(score>=70) return "🔴 EXTREME DANGER ("+score+")";
+  if(score>=40) return "🟠 MEDIUM DANGER ("+score+")";
+  return "🟢 SAFE ("+score+")";
+}
+
 /* ---------------- LOGIN ---------------- */
 function login(){
   let name=document.getElementById("name").value;
-  document.getElementById("status").innerHTML=
-  "👋 Welcome "+name+" | Risk: "+getRisk();
-}
 
-/* ---------------- AI RISK ---------------- */
-function getRisk(){
-  let h=new Date().getHours();
-  return (h>=22||h<=5)?"🔴 HIGH RISK":"🟢 SAFE";
+  document.getElementById("status").innerHTML=
+  "👋 Welcome "+name+" | "+getRiskScore();
 }
 
 /* ---------------- SOS CORE ---------------- */
@@ -116,20 +134,24 @@ function sendSOS(){
     time:new Date().toLocaleString()
   });
 
-  let audio=new Audio("https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg");
-  audio.play().catch(()=>{});
 }
 
-/* ---------------- BUTTON SOS ---------------- */
+/* ---------------- SOS ---------------- */
 function sos(){
-  document.getElementById("status").innerHTML="🚨 SOS ACTIVATED...";
+
+  document.body.classList.add("alert-bg");
+
+  document.getElementById("status").innerHTML=
+  "🚨 SOS ACTIVATED... "+getRiskScore();
+
   setTimeout(()=>{
     sendSOS();
-    document.getElementById("status").innerHTML="🚨 ALERT SENT!";
+    document.getElementById("status").innerHTML=
+    "🚨 ALERT SENT!";
   },1200);
 }
 
-/* ---------------- LIVE LOCATION ---------------- */
+/* ---------------- LOCATION ---------------- */
 function startTracking(){
 
   if(!navigator.geolocation){
@@ -143,20 +165,20 @@ function startTracking(){
       long=pos.coords.longitude;
 
       document.getElementById("status").innerHTML=
-      `📍 ${lat},${long}<br>${getRisk()}`;
+      `📍 ${lat},${long}<br>${getRiskScore()}`;
     },
     ()=>alert("Location blocked"),
     {enableHighAccuracy:true}
   );
 }
 
-/* ---------------- VOICE SOS FIX ---------------- */
+/* ---------------- VOICE FIX ---------------- */
 function voiceSOS(){
 
-  let SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  let SR=window.SpeechRecognition||window.webkitSpeechRecognition;
 
   if(!SR){
-    alert("Use Chrome Desktop for voice");
+    alert("Use Chrome Desktop");
     return;
   }
 
@@ -165,8 +187,7 @@ function voiceSOS(){
 
   rec.onresult=(e)=>{
     let text=e.results[0][0].transcript.toLowerCase();
-    document.getElementById("status").innerHTML="🎙️ "+text;
-    if(text.includes("help")||text.includes("sos")||text.includes("emergency")){
+    if(text.includes("help")||text.includes("sos")){
       sos();
     }
   };
@@ -174,22 +195,15 @@ function voiceSOS(){
   rec.start();
 }
 
-/* ---------------- TEXT SOS (FALLBACK) ---------------- */
+/* ---------------- TEXT SOS ---------------- */
 function textSOS(){
-  let val=document.getElementById("manualSOS").value.toLowerCase();
-  if(val.includes("sos")||val.includes("help")){
+  let v=document.getElementById("manualSOS").value.toLowerCase();
+  if(v.includes("sos")||v.includes("help")||v.includes("emergency")){
     sos();
   }
 }
 
-/* ---------------- SHAKE SOS ---------------- */
-window.addEventListener("devicemotion",(e)=>{
-  if(e.acceleration.x>15||e.acceleration.y>15){
-    sos();
-  }
-});
-
-/* ---------------- STEALTH MODE ---------------- */
+/* ---------------- STEALTH ---------------- */
 function stealthMode(){
 
   stealth=!stealth;
