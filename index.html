@@ -1,12 +1,11 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>SafeHer Shield AI PRO</title>
+<title>SafeHer Shield AI PRO+</title>
 
 <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
 
 <style>
-
 body{
   background:#0b1220;
   color:white;
@@ -43,6 +42,7 @@ button{
   border-radius:10px;
   cursor:pointer;
   color:white;
+  font-weight:bold;
 }
 
 .login{ background:#3b82f6; }
@@ -50,10 +50,12 @@ button{
 .loc{ background:#22c55e; }
 .voice{ background:#a855f7; }
 .stealth{ background:#f59e0b; }
+.call{ background:#f97316; }
 
 .status{
   margin-top:15px;
   font-weight:bold;
+  font-size:14px;
 }
 
 #fakeScreen{
@@ -62,19 +64,16 @@ button{
   color:#22c55e;
 }
 
-/* 🔴 ALERT BACKGROUND FIX */
 .alert-bg{
   background:#7f1d1d !important;
 }
-
 </style>
 </head>
 
 <body>
 
 <div class="card">
-
-<h1>🚨 SafeHer Shield AI PRO</h1>
+<h1>🚨 SafeHer Shield AI PRO+</h1>
 
 <input id="name" placeholder="Enter Name">
 <input id="phone" placeholder="Email / Contact">
@@ -84,12 +83,12 @@ button{
 <button class="loc" onclick="startTracking()">📍 LIVE LOCATION</button>
 <button class="voice" onclick="voiceSOS()">🎙️ VOICE SOS</button>
 <button class="stealth" onclick="stealthMode()">🕵️ STEALTH MODE</button>
+<button class="call" onclick="window.location.href='tel:112'">📞 EMERGENCY CALL</button>
 
-<input id="manualSOS" placeholder="Type SOS here (backup)">
+<input id="manualSOS" placeholder="Type SOS here">
 <button onclick="textSOS()">TYPE SOS</button>
 
 <div id="status" class="status"></div>
-
 </div>
 
 <script>
@@ -98,13 +97,36 @@ emailjs.init("YOUR_PUBLIC_KEY");
 
 let lat=0,long=0,stealth=false;
 
-/* ---------------- AI DANGER SCORE ---------------- */
+/* 🔊 ALERT SOUND */
+function playAlarm(){
+  let audio = new Audio("https://actions.google.com/sounds/v1/emergency/beeper_emergency_call.ogg");
+  audio.play();
+}
+
+/* 📳 VIBRATION */
+function vibrate(){
+  if(navigator.vibrate){
+    navigator.vibrate([300,200,300,200,500]);
+  }
+}
+
+/* 🔔 NOTIFICATION */
+function notify(msg){
+  if("Notification" in window){
+    Notification.requestPermission().then(p=>{
+      if(p==="granted"){
+        new Notification("SafeHer Alert 🚨",{body:msg});
+      }
+    });
+  }
+}
+
+/* 🧠 RISK ENGINE */
 function getRiskScore(){
-
-  let hour=new Date().getHours();
   let score=0;
+  let hour=new Date().getHours();
 
-  if(hour>=22||hour<=5) score+=60;
+  if(hour>=22||hour<=5) score+=50;
   if(lat!==0 && long!==0) score+=20;
   if(stealth) score+=10;
 
@@ -113,7 +135,7 @@ function getRiskScore(){
   return "🟢 SAFE ("+score+")";
 }
 
-/* ---------------- LOGIN ---------------- */
+/* LOGIN */
 function login(){
   let name=document.getElementById("name").value;
 
@@ -121,37 +143,45 @@ function login(){
   "👋 Welcome "+name+" | "+getRiskScore();
 }
 
-/* ---------------- SOS CORE ---------------- */
+/* 📧 EMAIL SEND */
 function sendSOS(){
 
   let name=document.getElementById("name").value;
   let contact=document.getElementById("phone").value;
+
+  document.getElementById("status").innerHTML=
+  "📡 Sending SOS via EmailJS to: "+contact;
 
   emailjs.send("SERVICE_ID","TEMPLATE_ID",{
     name:name,
     contact:contact,
     location:`https://maps.google.com/?q=${lat},${long}`,
     time:new Date().toLocaleString()
+  }).then(()=>{
+    document.getElementById("status").innerHTML="✅ SOS SENT SUCCESSFULLY";
+  }).catch(()=>{
+    document.getElementById("status").innerHTML="❌ SOS FAILED";
   });
-
 }
 
-/* ---------------- SOS ---------------- */
+/* 🚨 SOS CORE */
 function sos(){
 
   document.body.classList.add("alert-bg");
 
+  playAlarm();
+  vibrate();
+  notify("Emergency detected!");
+  
   document.getElementById("status").innerHTML=
   "🚨 SOS ACTIVATED... "+getRiskScore();
 
   setTimeout(()=>{
     sendSOS();
-    document.getElementById("status").innerHTML=
-    "🚨 ALERT SENT!";
   },1200);
 }
 
-/* ---------------- LOCATION ---------------- */
+/* 📍 LOCATION */
 function startTracking(){
 
   if(!navigator.geolocation){
@@ -172,7 +202,7 @@ function startTracking(){
   );
 }
 
-/* ---------------- VOICE FIX ---------------- */
+/* 🎙️ VOICE */
 function voiceSOS(){
 
   let SR=window.SpeechRecognition||window.webkitSpeechRecognition;
@@ -195,7 +225,7 @@ function voiceSOS(){
   rec.start();
 }
 
-/* ---------------- TEXT SOS ---------------- */
+/* 📝 TEXT SOS */
 function textSOS(){
   let v=document.getElementById("manualSOS").value.toLowerCase();
   if(v.includes("sos")||v.includes("help")||v.includes("emergency")){
@@ -203,7 +233,7 @@ function textSOS(){
   }
 }
 
-/* ---------------- STEALTH ---------------- */
+/* 🕵️ STEALTH MODE */
 function stealthMode(){
 
   stealth=!stealth;
@@ -213,7 +243,7 @@ function stealthMode(){
 
     let fake=document.createElement("div");
     fake.id="fakeScreen";
-    fake.innerHTML="📱 System Running...";
+    fake.innerHTML="📱 System Running Secure Mode...";
     document.body.appendChild(fake);
   }
   else{
